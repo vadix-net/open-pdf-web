@@ -1,0 +1,20 @@
+[
+  {
+    "id": "org.openpdf.word-count",
+    "name": "Word Count",
+    "version": "1.0.0",
+    "description": "Counts words, characters and pages of the active document.",
+    "author": "Open PDF Project",
+    "permissions": ["doc:info", "doc:text"],
+    "entry": "word-count/plugin.js"
+  },
+  {
+    "id": "org.openpdf.annotation-report",
+    "name": "Annotation Report",
+    "version": "1.0.0",
+    "description": "Summarizes review annotations by type and author.",
+    "author": "Open PDF Project",
+    "permissions": ["doc:info", "annots:read"],
+    "entry": "annotation-report/plugin.js"
+  }
+]

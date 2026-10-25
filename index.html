@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-glass="on">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/open-pdf-web/icons/icon-32.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' blob: data: http://localhost:11434 http://127.0.0.1:11434 ipc: http://ipc.localhost; worker-src 'self' blob:; frame-src 'self' blob: data:;"
+    />
+    <title>Open PDF</title>
+    <style>
+      /* Launch animation — inline so it paints before any app code loads. */
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(42% 48% at 10% 6%, rgba(91, 30, 43, 0.85), transparent 72%),
+          radial-gradient(46% 52% at 94% 96%, rgba(45, 36, 85, 0.85), transparent 72%),
+          radial-gradient(46% 52% at 6% 96%, rgba(15, 58, 63, 0.85), transparent 72%),
+          #14131a;
+        color: #ececf0;
+        font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+        pointer-events: auto;
+      }
+      [data-theme="light"] #splash {
+        background:
+          radial-gradient(42% 48% at 10% 6%, rgba(255, 196, 198, 0.95), transparent 72%),
+          radial-gradient(38% 44% at 92% 4%, rgba(255, 224, 189, 0.95), transparent 72%),
+          radial-gradient(46% 52% at 94% 96%, rgba(217, 208, 255, 0.95), transparent 72%),
+          radial-gradient(46% 52% at 6% 96%, rgba(207, 229, 255, 0.95), transparent 72%),
+          #f4eff3;
+        color: #1c1d22;
+      }
+      #splash .sp-stage { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+      #splash svg { width: 128px; height: 128px; overflow: visible; }
+      #splash .sp-word { font-size: 26px; font-weight: 600; letter-spacing: 0.2px; }
+      #splash .sp-layer, #splash .sp-word { opacity: 0; }
+      #splash.sp-play .sp-layer, #splash.sp-play .sp-word {
+        animation-duration: 180ms;
+        animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+        animation-fill-mode: both;
+      }
+      #splash.sp-play .sp-tile { animation-name: sp-pop; animation-delay: 0ms; transform-origin: 128px 128px; transform-box: view-box; }
+      #splash.sp-play .sp-sheen { animation-name: sp-drop; animation-delay: 120ms; animation-duration: 200ms; }
+      #splash.sp-play .sp-page { animation-name: sp-rise; animation-delay: 240ms; animation-duration: 200ms; }
+      #splash.sp-play .sp-fold { animation-name: sp-fold; animation-delay: 360ms; animation-duration: 100ms; transform-origin: 190px 50px; transform-box: view-box; }
+      #splash.sp-play .sp-line { animation-name: sp-draw; animation-duration: 140ms; transform-origin: 94px 0; transform-box: view-box; }
+      #splash.sp-play .sp-l1 { animation-delay: 440ms; }
+      #splash.sp-play .sp-l2 { animation-delay: 500ms; }
+      #splash.sp-play .sp-l3 { animation-delay: 560ms; }
+      #splash.sp-play .sp-word { animation-name: sp-rise-word; animation-delay: 520ms; }
+      #splash.sp-out { opacity: 0; transform: scale(1.02); transition: opacity 200ms ease, transform 200ms ease; pointer-events: none; }
+      @keyframes sp-pop { from { opacity: 0; transform: scale(0.86); } to { opacity: 1; transform: none; } }
+      @keyframes sp-drop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+      @keyframes sp-rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+      @keyframes sp-fold { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: none; } }
+      @keyframes sp-draw { from { opacity: 1; transform: scaleX(0); } to { opacity: 1; transform: none; } }
+      @keyframes sp-rise-word { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    </style>
+    <script type="module" crossorigin src="/open-pdf-web/assets/index-CyRot_Qh.js"></script>
+    <link rel="stylesheet" crossorigin href="/open-pdf-web/assets/index-_w816fr6.css">
+  </head>
+  <body>
+    <div id="splash" aria-hidden="true">
+      <div class="sp-stage">
+        <!-- the app icon's own layers (src-tauri/icons/source/open-pdf.svg) -->
+        <svg viewBox="0 0 256 256">
+          <defs>
+            <linearGradient id="spTile" x1="0.12" y1="0.04" x2="0.88" y2="0.98">
+              <stop offset="0" stop-color="#ff7a6e" /><stop offset="0.5" stop-color="#e5484d" /><stop offset="1" stop-color="#a8192f" />
+            </linearGradient>
+            <linearGradient id="spSheen" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fff" stop-opacity="0.42" /><stop offset="1" stop-color="#fff" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="spRim" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fff" stop-opacity="0.75" /><stop offset="1" stop-color="#fff" stop-opacity="0.12" />
+            </linearGradient>
+            <linearGradient id="spPage" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fff" /><stop offset="1" stop-color="#fdecec" />
+            </linearGradient>
+            <filter id="spShadow" x="-30%" y="-20%" width="160%" height="150%">
+              <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#5c0a16" flood-opacity="0.38" />
+            </filter>
+          </defs>
+          <g class="sp-layer sp-tile">
+            <rect x="8" y="8" width="240" height="240" rx="58" fill="url(#spTile)" />
+            <rect x="9.5" y="9.5" width="237" height="237" rx="56.5" fill="none" stroke="url(#spRim)" stroke-width="3" />
+          </g>
+          <path class="sp-layer sp-sheen" d="M66 8h124c32 0 58 26 58 58v26c-38-22-84-32-120-32S46 70 8 92V66C8 34 34 8 66 8z" fill="url(#spSheen)" />
+          <g class="sp-layer sp-page" filter="url(#spShadow)">
+            <path d="M86 50h66l38 38v108c0 8-6 14-14 14H86c-8 0-14-6-14-14V64c0-8 6-14 14-14z" fill="url(#spPage)" />
+          </g>
+          <path class="sp-layer sp-fold" d="M152 50l38 38h-28c-6 0-10-4-10-10z" fill="#f4b8bb" />
+          <rect class="sp-layer sp-line sp-l1" x="94" y="112" width="74" height="11" rx="5.5" fill="#e5484d" />
+          <rect class="sp-layer sp-line sp-l2" x="94" y="136" width="68" height="11" rx="5.5" fill="#e5484d" fill-opacity="0.72" />
+          <rect class="sp-layer sp-line sp-l3" x="94" y="160" width="46" height="11" rx="5.5" fill="#e5484d" fill-opacity="0.5" />
+        </svg>
+        <div class="sp-word">Open PDF</div>
+      </div>
+    </div>
+    <script src="/open-pdf-web/splash.js"></script>
+    <div id="root"></div>
+  </body>
+</html>
